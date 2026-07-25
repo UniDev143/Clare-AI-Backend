@@ -39,6 +39,7 @@ REJECTION CASES (validImage: false):
 - Too dark or blurry to analyse → "poor_quality"
 - Heavy makeup obscuring skin → "heavy_makeup"
 - Cartoon/drawing/AI-generated face → "not_real_photo"
+- Photo of a screen/monitor displaying a face (visible pixel grid, moiré patterns, screen bezels, or glare bands) → "not_real_photo"
 
 MAKEUP NOTE: Light makeup is acceptable — analyse what is visible and set confidence to "medium" or "low". Heavy full-coverage makeup that hides the actual skin → reject with "heavy_makeup".
 
@@ -73,5 +74,5 @@ If validImage is false: set all conditions to detected false with score 0, skinT
 module.exports = {
   SKIN_ANALYSIS_SYSTEM_PROMPT,
   SKIN_ANALYSIS_USER_PROMPT,
-  PROMPT_VERSION: '1.0'
-};
+  PROMPT_VERSION: '1.1'
+} 

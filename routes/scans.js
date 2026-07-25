@@ -1,18 +1,15 @@
 const express = require('express');
 const router  = express.Router();
 const {
-  createScan, getScan, getAnalytics, uploadImage
+  createScan, getScan, getAnalytics,
+  uploadImage, updateQuestionnaire
 } = require('../controllers/scanController');
 const { protect } = require('../middleware/auth');
 
-// ── PUBLIC ROUTES (no token needed) ───────────────────────
 router.post('/',             createScan);
 router.post('/upload-image', uploadImage);
-
-// ── PUBLIC GET (no token needed) ───────────────────────────
-router.get('/:id', getScan);
-
-// ── PROTECTED ROUTES (admin only) ──────────────────────────
 router.get('/analytics/summary', protect, getAnalytics);
+router.get('/:id',           getScan);
+router.patch('/:id/questionnaire', updateQuestionnaire);
 
 module.exports = router;

@@ -130,6 +130,7 @@ const scanSchema = new mongoose.Schema(
       }, // ← ADD
       rejected: { type: Boolean, default: false }, // ← ADD
       rejectionReason: { type: String, default: null },
+      promptVersion: { type: String, default: null },
     },
 
     // ── RECOMMENDATIONS ────────────────────────────────────────
