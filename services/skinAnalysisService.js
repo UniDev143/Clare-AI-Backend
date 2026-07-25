@@ -6,7 +6,11 @@ const {
 } = require("../prompts/skinAnalysisPrompt");
 const { validateAnalysis } = require("./analysisValidator");
 
-const client = new Anthropic({ apiKey: process.env.ANTHROPIC_API_KEY });
+const client = new Anthropic({
+  apiKey:     process.env.ANTHROPIC_API_KEY,
+  timeout:    30 * 1000,   // 30s per attempt
+  maxRetries: 0,           // we handle retries ourselves in analyseSkinWithRetry
+});
 
 // ── MAIN ANALYSIS FUNCTION ─────────────────────────────────
 const analyseSkin = async (
@@ -115,24 +119,17 @@ Base ALL severity ratings purely on visual evidence. Questionnaire context only 
 
 // ── RETRY WRAPPER ──────────────────────────────────────────
 // For transient failures (network blips, rate limits), retry once
-const analyseSkinWithRetry = async (
-  imageData,
-  mimeType,
-  questionnaire,
-  retries = 1,
-) => {
+const NON_RETRYABLE = ['Invalid Anthropic', 'Image format not supported'];
+
+const analyseSkinWithRetry = async (imageData, mimeType, questionnaire, retries = 1) => {
   try {
     return await analyseSkin(imageData, mimeType, questionnaire);
   } catch (error) {
-    if (retries > 0 && !error.message.includes("Invalid Anthropic")) {
+    const permanent = NON_RETRYABLE.some(m => error.message.includes(m));
+    if (retries > 0 && !permanent) {
       console.log(`[SkinAnalysis] Retrying after error: ${error.message}`);
-      await new Promise((r) => setTimeout(r, 2000)); // wait 2s before retry
-      return analyseSkinWithRetry(
-        imageData,
-        mimeType,
-        questionnaire,
-        retries - 1,
-      );
+      await new Promise(r => setTimeout(r, 2000));
+      return analyseSkinWithRetry(imageData, mimeType, questionnaire, retries - 1);
     }
     throw error;
   }
